@@ -17,9 +17,14 @@ def skill_match_score(resume_text, skills=SKILLS):
     text = resume_text.lower()
     matches = 0
     for skill in skills:
-        if skill in resume_text:
+        if skill.lower() in resume_text:
             matches+=1
     return matches / len(skills)
+
+def domain_penalty(text):
+    if "embedded" in text or "firmware" in text or "rtos" in text:
+        return 0.7
+    return 1.0
 
 st.set_page_config(
     page_title= "Resume Ranker",
@@ -83,11 +88,12 @@ if rank_button:
             resume_embedding = model.encode(text)
             semantic = util.cos_sim(job_embedding, resume_embedding).item()
             skill_score = skill_match_score(text, SKILLS)
+            penalty = domain_penalty(text)
 
-            final_score = 100 * ((0.7 * semantic) + (0.3 * skill_score))
+            final_score = penalty * 100 * ((0.6 * semantic) + (0.4 * skill_score))
             results.append((name, semantic, skill_score, final_score))
 
-        results.sort(key=lambda x: x[1], reverse = True)
+        results.sort(key=lambda x: x[3], reverse = True)
         
         df = pd.DataFrame(results, columns=["Resume", "Semantic Score", "Skill Score", "Final Score"])
         df.sort_values("Final Score", ascending=False).reset_index(drop=True)
