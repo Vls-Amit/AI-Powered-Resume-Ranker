@@ -5,14 +5,12 @@ import re
 import pandas as pd
 
 SKILLS = [
-    "fitness", "hiit", "cardio", "conditioning", "crossfit", "health", "nutrition",
-    "training", "client", "routine",
-
-    "security", "surveillance", "cctv", "law", "compliance", "investigation",
-    "protection", "detain", "crisis",
-
-    "packing", "picking", "inventory", "logistics", "supply", "warehouse",
-    "sanitation", "record", "distribution"
+    "senior software engineer","large-scale systems","2M daily users","product engineering","react","frontend architecture","cloud-based systems","cross-functional","technical leadership","mentoring","scalability","performance optimization","system ownership","architecture","documentation","requirements",
+    "cloud migration","aws","gcp","cost optimization","distributed systems","platform engineering","ci/cd","deployment pipelines","scalable platforms","system reliability","observability","frontend backend integration","technical mentorship","operational efficiency","architecture decisions",
+    "distributed systems","35M users","500k concurrent users","high concurrency","rest apis","backend architecture","system re-architecture","performance optimization","scalability","qa automation","nodejs","django","full stack","platform engineering",
+    "backend engineering","java","rest apis","aws","docker","jenkins","performance tuning","latency optimization","system reliability","cloud security","ci/cd","database optimization","testing","production systems",
+    "embedded systems","firmware","c/c++","rtos","hardware software integration","system architecture","verification frameworks","low-level debugging","jtag","swd","deterministic systems","toolchain","infrastructure tools",
+    "full stack","python","django","angular","data pipelines","rest apis","graphql","postgresql","analytics","data ingestion","automation testing","user experience","feature development","experimentation"
 ]
 
 def skill_match_score(resume_text, skills=SKILLS):
@@ -98,4 +96,5 @@ if rank_button:
         st.dataframe(df.style.highlight_max(color='darkgreen', subset=['Final Score']))
         st.caption("Scores are calculated based on 70% semantic similarity and 30% skill match.")
         st.caption("The Final Score is an aggregate of both scores and is out of 100.")
+
         st.success("Ranking completed!")
