@@ -13,16 +13,21 @@ SKILLS = [
     "full stack","python","django","angular","data pipelines","rest apis","graphql","postgresql","analytics","data ingestion","automation testing","user experience","feature development","experimentation"
 ]
 
+SKILLS = list(set(SKILLS))
 def skill_match_score(resume_text, skills=SKILLS):
     text = resume_text.lower()
     matches = 0
     for skill in skills:
-        if skill.lower() in resume_text:
+        if skill.lower() in text:
             matches+=1
     return matches / len(skills)
 
 def domain_penalty(text):
-    if "embedded" in text or "firmware" in text or "rtos" in text:
+    embedded_terms = ["embedded", "firmware", "rtos"]
+    resume_embedded = any(t in resume_text for t in embedded_terms)
+    job_embedded = any(t in job_text for t in embedded_terms)
+
+    if resume_embedded and not job_embedded:
         return 0.7
     return 1.0
 
@@ -88,7 +93,7 @@ if rank_button:
             resume_embedding = model.encode(text)
             semantic = util.cos_sim(job_embedding, resume_embedding).item()
             skill_score = skill_match_score(text, SKILLS)
-            penalty = domain_penalty(text)
+            penalty = domain_penalty(text, clean_text(job_description)
 
             final_score = penalty * 100 * ((0.6 * semantic) + (0.4 * skill_score))
             results.append((name, semantic, skill_score, final_score))
@@ -96,11 +101,11 @@ if rank_button:
         results.sort(key=lambda x: x[3], reverse = True)
         
         df = pd.DataFrame(results, columns=["Resume", "Semantic Score", "Skill Score", "Final Score"])
-        df.sort_values("Final Score", ascending=False).reset_index(drop=True)
+        df = df.sort_values("Final Score", ascending=False).reset_index(drop=True)
         df.index+=1
         df.index.name = "Rank"
         st.dataframe(df.style.highlight_max(color='darkgreen', subset=['Final Score']))
-        st.caption("Scores are calculated based on 70% semantic similarity and 30% skill match.")
         st.caption("The Final Score is an aggregate of both scores and is out of 100.")
 
         st.success("Ranking completed!")
+
