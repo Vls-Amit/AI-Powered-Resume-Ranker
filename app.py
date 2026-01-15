@@ -22,10 +22,16 @@ def skill_match_score(resume_text, skills=SKILLS):
             matches+=1
     return matches / len(skills)
 
-def domain_penalty(text):
+def domain_penalty(resume_text, job_text):
+    if resume_text is None:
+        resume_text = ""
+    if job_text is None:
+        job_text = ""
+
     embedded_terms = ["embedded", "firmware", "rtos"]
-    resume_embedded = any(t in resume_text for t in embedded_terms)
-    job_embedded = any(t in job_text for t in embedded_terms)
+
+    resume_embedded = any(term in resume_text for term in embedded_terms)
+    job_embedded = any(term in job_text for term in embedded_terms)
 
     if resume_embedded and not job_embedded:
         return 0.7
@@ -56,10 +62,13 @@ uploaded_files = st.file_uploader(
 rank_button = st.button("Rank Resumes")
 
 def clean_text(text):
+    if not text:
+        return ""
     text = text.lower()
     text = re.sub(r'\s+', ' ', text)
     text = re.sub(r'[^a-zA-Z0-9 .,]', '', text)
     return text
+
 
 @st.cache_resource
 def load_model():
@@ -87,13 +96,14 @@ if rank_button:
             text = extract_text_from_pdf(file)
             resume_texts.append((file.name, clean_text(text)))
 
-        job_embedding = model.encode(clean_text(job_description))
+        clean_job = clean_text(job_description)
+        job_embedding = model.encode(clean_job)
         results = []
         for name, text in resume_texts:
             resume_embedding = model.encode(text)
             semantic = util.cos_sim(job_embedding, resume_embedding).item()
             skill_score = skill_match_score(text, SKILLS)
-            penalty = domain_penalty(text, clean_text(job_description))
+            penalty = domain_penalty(text, clean_job)
 
             final_score = penalty * 100 * ((0.6 * semantic) + (0.4 * skill_score))
             results.append((name, semantic, skill_score, final_score))
@@ -108,5 +118,6 @@ if rank_button:
         st.caption("The Final Score is an aggregate of both scores and is out of 100.")
 
         st.success("Ranking completed!")
+
 
 
