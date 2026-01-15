@@ -93,7 +93,7 @@ if rank_button:
             resume_embedding = model.encode(text)
             semantic = util.cos_sim(job_embedding, resume_embedding).item()
             skill_score = skill_match_score(text, SKILLS)
-            penalty = domain_penalty(text, clean_text(job_description)
+            penalty = domain_penalty(text, clean_text(job_description))
 
             final_score = penalty * 100 * ((0.6 * semantic) + (0.4 * skill_score))
             results.append((name, semantic, skill_score, final_score))
@@ -108,4 +108,5 @@ if rank_button:
         st.caption("The Final Score is an aggregate of both scores and is out of 100.")
 
         st.success("Ranking completed!")
+
 
