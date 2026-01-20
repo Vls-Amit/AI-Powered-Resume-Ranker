@@ -22,6 +22,16 @@ def skill_match_score(resume_text, skills=SKILLS):
             matches+=1
     return matches / len(skills)
 
+def seniority_score(text):
+    years = re.findall(r'(\d+)\+?\s*years?', text)
+    if years:
+        return min(int(years[0]), 1.0)
+    if "senior" in text:
+        return 0.9
+    if "intern" or "junior" in text:
+        return 0.3
+    return 0.6
+
 def domain_penalty(resume_text, job_text):
     if resume_text is None:
         resume_text = ""
@@ -106,6 +116,7 @@ if rank_button:
             penalty = domain_penalty(text, clean_job)
 
             final_score = penalty * 100 * ((0.6 * semantic) + (0.4 * skill_score))
+            final_score *= (0.8 + 0.2 * seniority_score(text))
             results.append((name, semantic, skill_score, final_score))
 
         results.sort(key=lambda x: x[3], reverse = True)
@@ -118,6 +129,7 @@ if rank_button:
         st.caption("The Final Score is an aggregate of both scores and is out of 100.")
 
         st.success("Ranking completed!")
+
 
 
 
